@@ -1,0 +1,488 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>Mindgrub reveal.js</title>
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/mindgrub.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class='footer'>
+				<div class="left">
+					<a href="https://www.mindgrub.com"><img src="assets/mindgrub-logo.png"/></a>
+				</div>
+				<div class="right">
+					<span><a href="https://www.drupal.org/u/aczietlow">Chris Zietlow</a></span>
+					<span><a href="http://aczietlow.github.io/behat/">Intro to Solr</a></span>
+					<span><a href="https://twitter.com/aczietlow">@aczietlow</a></span>
+				</div>
+			</div>
+			<div class="slides">
+				<!-- Intro -->
+				<section>
+					<section>
+						<h2>Find Exactly What You're Looking for With Solr </h2>
+					</section>
+					<section>
+						<img data-src="assets/chris_z2.jpg" alt="Mug shot of Chris Z" width="75%"/>
+						<h2><a href="https://twitter.com/aczietlow">@aczietlow</a></h2>
+						<span>Engineer Manager, <a href="https://www.mindgrub.com">Mindgrub</a></span>
+					</section>
+				</section>
+				<!-- Introduce Topic -->
+				<section>
+					<section>
+						<h2>Drupal</h2>
+						<p>Create at content management, and serving up that content</p>
+					</section>
+					<section>
+						<h2>Searching out of the box</h2>
+						<img data-src="assets/search_results.png" alt="Searching" width="70%"/>
+						<!-- Start by searching session titles -->
+					</section>
+					<section>
+						<h2>Let's look under the hood</h2>
+						<pre><code class="hljs" data-trim >
+						SELECT * FROM sessions WHERE title = 'Composer Plugins 101';
+					</code></pre>
+						<img data-src="assets/FLDC-session-composer-plugins.png" alt="Screenshot of FLDC session" width="75%"/>
+					</section>
+					<section>
+						<h2>Database Searches</h2>
+						<pre><code class="hljs" data-trim >
+						SELECT * FROM sessions WHERE title = 'Composer Modules 101';
+						SELECT * FROM sessions WHERE title = 'Composer Plugin 101';
+						SELECT * FROM sessions WHERE title = 'Comopser Plugins 101';
+					</code></pre>
+						<p class="fragment">0 Results found</p>
+					</section>
+					<section>
+						<h2>Database Searches</h2>
+						<pre><code class="hljs" data-trim >
+						SELECT * FROM sessions
+						WHERE title LIKE '%composer%'
+						AND title LIKE '%plugins%';
+					</code></pre>
+						<table style="font-weight: 200; font-size: 30px">
+							<thead>
+							<tr>
+								<th>Matches</th>
+								<th>No Matches</th>
+							</tr>
+							</thead>
+							<tbody>
+							<tr>
+								<td>
+									<ul>
+										<li><strong>Composer</strong> <strong>Plugins</strong> 101</li>
+									</ul>
+								</td>
+								<td>
+									<ul>
+										<li>Beginner's guide to writing <strong>composer</strong> <strong>plugins</strong></li>
+										<li>Hot to write <strong>composer</strong> <strong>plugins</strong></li>
+										<li>Customizing and extending  <strong>Composer</strong></li>
+									</ul>
+								</td>
+							</tr>
+							</tbody>
+						</table>
+					</section>
+					<section>
+						<h2>Database Searches</h2>
+						<pre><code class="hljs" data-trim >
+						SELECT * FROM sessions
+						WHERE title LIKE '%composer%'
+						OR title LIKE '%plugins%';
+					</code></pre>
+						<table style="font-weight: 200; font-size: 30px">
+							<thead>
+							<tr>
+								<th>Matches</th>
+								<th>No Matches</th>
+							</tr>
+							</thead>
+							<tbody>
+							<tr>
+								<td>
+									<ul>
+										<li><strong>Composer</strong> <strong>Plugins</strong> 101</li>
+										<li>Beginner's guide to writing <strong>composer</strong> <strong>plugins</strong></li>
+										<li>Hot to write <strong>composer</strong> <strong>plugins</strong></li>
+										<li>Customizing and extending  <strong>Composer</strong></li>
+									</ul>
+								</td>
+								<td>
+									<ul>
+										<li>Dependency Manager for PHP</li>
+									</ul>
+								</td>
+							</tr>
+							</tbody>
+						</table>
+					</section>
+					<section>
+						<h2>Database Searches</h2>
+						<pre><code class="hljs" data-trim >
+						SELECT * FROM sessions WHERE title = 'Composer Modules 101';
+						SELECT * FROM sessions WHERE title = 'Composer Plugin 101';
+						SELECT * FROM sessions WHERE title = 'Comopser Plugins 101';
+						</code></pre>
+						<p style="font-size: 30px">0 Results</p>
+						<pre><code class="hljs" data-trim >
+						SELECT * FROM sessions
+						WHERE title LIKE '%composer%'
+						AND title LIKE '%plugins%';
+						</code></pre>
+						<p style="font-size: 30px">Matched some results, but not as many as we had hoped</p>
+						<pre><code class="hljs" data-trim >
+						SELECT * FROM sessions
+						WHERE title LIKE '%composer%'
+						OR title LIKE '%plugins%';
+						</code></pre>
+						<p style="font-size: 30px">Matched a lot of results, but computationally expensive</p>
+					</section>
+				</section>
+				<!-- Introduce Topic -->
+				<section>
+					<section>
+						<h2>Limitations of Searching MySQL</h2>
+						<p> Or any relational database</p>
+						<ul>
+							<li class="fragment">Can mostly only do substring matching ('%composer%')</li>
+							<li class="fragment">Can't natively handle spelling mistakes</li>
+							<li class="fragment">Doesn't understand linguistic variations (developing and develop)</li>
+							<li class="fragment">Doesn't understand synonyms  (developing and coding)</li>
+							<li class="fragment">Matches unimportant words ("an", "the", "a"</li>
+							<li class="fragment">Doesn't do relevancy of matched results</li>
+						</ul>
+					</section>
+					<section>
+						<h2>Limitations of Searching MySQL</h2>
+						<pre><code class="hljs" data-trim >
+						SELECT * FROM sessions
+						WHERE title LIKE '%composer%'
+						AND title LIKE '%plugins%';
+						</code></pre>
+						<p> Scalability of this will become an issue as more rows are added to the database</p>
+					</section>
+				</section>
+				<!-- Overview of Solr -->
+				<section>
+					<section>
+						<h2>Finding a better search tool: Solr</h2>
+						<ul>
+							<li class="fragment">Text Centric</li>
+							<li class="fragment">Read first <ul>
+								<li class="fragment">Read way more often than created or updated. Not great for real time data store</li>
+							</ul></li>
+							<li class="fragment">Document Oriented</li>
+							<li class="fragment">Designed for large data volumes</li>
+							<li class="fragment">Flexible Schema</li>
+						</ul>
+					</section>
+					<section>
+						<h2>Document-Oriented Storage</h2>
+						<ul>
+							<li class="fragment">Data of NoSql database</li>
+							<li class="fragment">Data Described as a collection of key:value pairs</li>
+							<li class="fragment">Ex of document are JSON, XML, PDF, etc</li>
+							<li class="fragment">Nodes can be expressed as a single document</li>
+						</ul>
+						<pre class="fragment"><code class="hljs" data-trim >
+{
+  "id": "home 1",
+  "location": "Charleston, SC",
+  "bedrooms": 3,
+  "type": "sale"
+}
+						</code></pre>
+					</section>
+					<section>
+						<h2>Flexible Schema</h2>
+						<ul>
+							<li>Directly store documents of a similar nature</li>
+							<li>Different approach than a relational Database</li>
+						</ul>
+						<pre><code class="hljs" data-trim >
+{
+  "id": "home 1",
+  "location": "Charleston, SC",
+  "mls": 1234566,
+  "bedrooms": 3,
+  "type": "sale"
+}
+						</code></pre>
+						<pre><code class="hljs" data-trim >
+{
+  "id": "home 2",
+  "location": "Summerville, SC",
+  "bedrooms": 3,
+  "type": "rent",
+  "rent": 1000
+}
+						</code></pre>
+					</section>
+				</section>
+				<!-- Basic Solr overview of Solr-->
+				<section>
+					<section>
+						<h2>Drupal and Solr</h2>
+						<img data-src="assets/solr_and_drupal.png" alt="Sorl Admin UI" width="75%"/>
+						<p><a href="https://solarium.readthedocs.io/en/stable/documents/">Solarium Documentation</a></p>
+					</section>
+					<section>
+						<h2>Querying in Solr</h2>
+						<img data-src="assets/SolrAdminUI.png" alt="Sorl Admin UI" width="75%"/>
+					</section>
+					<section>
+						<h2>q parameter</h2>
+						<ul>
+							<li class="fragment">"q" Query string</li>
+							<li class="fragment">syntax is `fieldName:value`</li>
+							<li class="fragment">* is a wildcard. So *:* will return all documents</li>
+							<li class="fragment">`fieldName` is optional</li>
+							<li class="fragment">Results returned are ranked by relevancy</li>
+						</ul>
+					</section>
+					<section>
+						<h2>fq parameter</h2>
+						<ul>
+							<li class="fragment">Filter Queries</li>
+							<li class="fragment">Are checks for inclusion or exclusion</li>
+							<li class="fragment">Has no effect on relevancy</li>
+							<li class="fragment">Fast to compute</li>
+							<li class="fragment">Use the syntax of `fieldName:value`</li>
+						</ul>
+					</section>
+					<section>
+						<h2>Sort</h2>
+						<ul>
+							<li class="fragment">Can specify field to sort by</li>
+							<li	class="fragment">Syntax `fieldName asc`</li>
+							<li class="fragment">Defaults to relevancy</li>
+						</ul>
+<!--						E.g. sort by lowest or highest price-->
+					</section>
+					<section>
+						<h2>fl parameter</h2>
+						<ul>
+							<li class="fragment">Field list</li>
+							<li class="fragment">Syntax is comma separated list of fieldNames</li>
+							<li	class="fragment">Useful to reduce the size of requests over the network</li>
+							<li class="fragment">"score" is a field option that is hidden by default</li>
+							<li class="fragment">"*,score" can be used to append the relevancy score to results</li>
+						</ul>
+					</section>
+					<section>
+						<h2>df</h2>
+						<ul>
+							<li class="fragment">Defined field</li>
+							<li class="fragment">Specify field to search the q param when q doesn't provide a field</li>
+						</ul>
+					</section>
+					<section>
+						<h2>wt</h2>
+						<ul>
+							<li>writer type</li>
+							<li class="fragment">Formats of returns</li>
+							<li class="fragment">json, xml, python, ruby, php</li>
+						</ul>
+					</section>
+				</section>
+				<!-- Walk through of searching -->
+				<section>
+					<section>
+						<h2>Review</h2>
+						<p>fq - limits of matching docs</p>
+						<p>q - limits of matching docs AND calculates relevancy score based on the query parser</p>
+					</section>
+					<section>
+						<h2>Uses of fq</h2>
+						<ul>
+							<li	class="fragment">Filter result of documents into smaller subsets</li>
+							<li	class="fragment">Filtered based on machine data without user sanitized input
+							<ul><li class="fragment">Faster, can be cached on the solr layer</li>
+							<li class="fragment">Doesn't have to run through the query parser</li> </ul></li>
+						</ul>
+					</section>
+					<section>
+						<h2>faceted search</h2>
+						<ul>
+							<li	class="fragment">Groups result documents in clusters or groups</li>
+							<li class="fragment">Provides direct user feedback</li>
+							<li class="fragment">Reduces "dead searches"</li>
+						</ul>
+					</section>
+					<section>
+						<h2>faceted search</h2>
+						<img data-src="assets/lego_website_facets.png" alt="Lego.com facets example"/>
+					</section>
+					<section>
+						<h2>Faceting Types</h2>
+						<ul>
+							<li class="fragment">Field Faceting<ul><li class="fragment">Groups by specified fields</li></ul></li>
+							<li class="fragment">Range Faceting<ul><li class="fragment">Groups by Ranges, such as price or date ranges</li></ul></li>
+							<li class="fragment">Query Faceting<ul><li class="fragment">Groups by secondarily defined queries</li></ul></li>
+						</ul>
+					</section>
+					<section>
+						<h2>Faceting Demos</h2>
+
+					</section>
+					<!-- @TODO Further explain and demo faceted ranges -->
+					<section>
+						<h2>Interacting with Facets</h2>
+						<ul>
+							<li class="fragment">It's up to Drupal's front end layer to present facets as links</li>
+							<li class="fragment">To see results of the facets, use an fq parameter based on the field or range from the facet</li>
+						</ul>
+					</section>
+					<section>
+						<pre><code  data-trim >
+
+$client = new Solarium\Client($adapter, $eventDispatcher, $config);
+
+// get a select query instance
+$query = $client->createSelect();
+
+// apply settings using the API
+$query->setQuery('*:*');
+$query->setStart(2)->setRows(20);
+$query->setFields(array('id','title','set', 'price'));
+$query->addSort('price', $query::SORT_ASC);
+
+// create a filterquery using the API
+$fq = $query->createFilterQuery('maxprice')->setQuery('price:[1 TO 300]');
+
+// create a facet field instance and set options using the API
+$facetSet = $query->getFacetSet();
+$facet = $facetSet->createFacetField('stock')->setField('inStock');
+
+// this executes the query and returns the result
+$resultset = $client->select($query);
+
+// display the total number of documents found by Solr
+echo 'NumFound: '.$resultset->getNumFound();
+
+// display facet counts
+echo 'Facet counts for field "inStock":';
+$facet = $resultset->getFacetSet()->getFacet('stock');
+foreach ($resultset as $doc) {
+
+| id | title | set | price |
+| $doc->id; | $doc->title | $doc->set | $doc->price |
+
+}
+						</code></pre>
+					</section>
+				</section>
+<!--				<section>-->
+<!--					<section>-->
+<!--						<h2>Missing Content</h2>-->
+<!--						<ul>-->
+<!--							<li>Further Explanation of Solr Query Parsers</li>-->
+<!--							<li>High Level overview of text analysis, natural language processing</li>-->
+<!--							<li>Typical implementations of Solr into Drupal</li>-->
+<!--							<li>Why to ever use solr, and when to pull it out from the toolbox</li>-->
+<!--							<li>A working cool demo</li>-->
+<!--						</ul>-->
+<!--					</section>-->
+<!--				</section>-->
+				<section>
+					<section>
+						<h2>Text Analysis</h2>
+						<p>Stop Word Filters</p>
+						<ul>
+							<li>Removes common words from search input</li>
+							<li>"on", "a", "an", "from"</li>
+						</ul>
+					</section>
+					<section>
+						<h2>Text Analysis</h2>
+						<p>Stem Filters</p>
+						<ul>
+							<li>Doesn't need to enter exact form a query term</li>
+							<li>handles singular and plural versions of words</li>
+							<li>legos == logo, bricks == brick</li>
+							<li>Can transform various conjugations into a base term</li>
+							<li>running, ran, runs == run</li>
+							<li>requires a dictionary file to perform this kind of look ups</li>
+						</ul>
+					</section>
+					<section>
+						<h2>Text Analysis</h2>
+						<p>Word Delimiter Graph Filter</p>
+						<ul>
+							<li>Can split words based on a specified delimiters</li>
+							<li>by character: wi-fi == wifi</li>
+							<li>by CamelCase: DrupalCoreTests == "drupal", "core", "test"</li>
+						</ul>
+					</section>
+					<section>
+						<h2>Text Analysis</h2>
+						<p>There's a lot more available in the documentation</p>
+						<a href="https://solr.apache.org/guide/8_11/filter-descriptions.html">Solr Filter Descriptions</a>
+					</section>
+				</section>
+				<section style="text-align: left;">
+					<h1>THE END</h1>
+					<p>
+						- Solr is awesome
+					</p>
+					<p>
+						- <a href="https://solr.apache.org/guide/8_11//">Solr Documentation</a> <br>
+						- <a href="https://solarium.readthedocs.io/en/stable/solarium-concepts/">Solarium Docs</a> <br>
+						- Follow me on twitter: <a href="https://twitter.com/aczietlow">@aczietlow</a>
+					</p>
+				</section>
+
+			</div>
+		</div>
+
+		<script src="lib/js/jquery-3.3.1.min.js"></script>
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/mindgrub.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+		<script>
+            // displayed upon load, hides when slide changes
+            Reveal.addEventListener('slidechanged', function(event) {
+                document.querySelector('.reveal .footer').style.display = 'none';
+            });
+		</script>
+	</body>
+</html>
