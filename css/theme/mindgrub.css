@@ -311,8 +311,14 @@ body {
     position: absolute;
     bottom: 0;
     right: 0;
-    top: 40%; }
+    top: 41%;
+  }
   .reveal .footer span {
     padding-left: 1.8em;
     padding-right: 1.8em;
     font-size: 1.33em; }
+@media only screen and (max-width: 1080px) {
+  .reveal .footer .right  {
+    display: none;
+  }
+}
